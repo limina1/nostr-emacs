@@ -8,7 +8,6 @@
 # Org Mode
 *~
 *.html
-*.org
 
 # Python
 *.db

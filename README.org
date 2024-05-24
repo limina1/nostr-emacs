@@ -10,5 +10,6 @@
 - Load `nostr.el` into your emacs
 
 ** Roadmap
+- *don't save keys in script*
 - Integrate with elfeed or GNUs for feed and commenting
 - Save and load keys with password protection
