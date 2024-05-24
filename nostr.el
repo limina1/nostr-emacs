@@ -11,23 +11,19 @@
 (setq nostr-keys-python (concat nostr-root "nostr_keys.py"))
 
 
-(defun nostr-get-sk (filename)
-  (replace-regexp-in-string "\n$" ""
-    (shell-command-to-string
-      (format "%s %s load_key %s" nostr-python-path nostr-keys-python filename)))
+(defun nostr-get-sk ()
+  "nsec1swfhcrsvmfw5actkgw5445k48lewpund60ff90mm5j3up0wat8pqfqced2"
+  )
+(defun nostr-get-hex() "83937c0e0cda5d4ee17643a95ad2d53ff2e0f26dd3d292bf7ba4a3c0bddd59c2")
+
+(defvar nostr-get-npub () "npub1xaq0sg0cgp0vqdkcnqxyy45ad6hcq6m5xj2cuk92ppjnzspkjdtsnypqdt"
   )
 
-
-(defun nostr-get-pk (sk)
-  (replace-regexp-in-string "\n$" ""
-    (shell-command-to-string
-      (format "%s %s get_pk %s" nostr-python-path nostr-keys-python sk)))
-  )
 
 
 (defadvice json-encode (around encode-nil-as-json-empty-object activate)
   (if (null object)
-    (setq ad-return-value "[]")
+      (setq ad-return-value "[]")
     ad-do-it))
 
 
@@ -36,12 +32,11 @@
   )
 
 
-(defun nostr-sign (message sk)
-  (replace-regexp-in-string "\n$" ""
-    (shell-command-to-string
-      (format "%s %s sign %s %s" nostr-python-path nostr-keys-python message sk)))
-  )
-
+(defun nostr-sign (message)
+  (shell-command-to-string
+   (format "python%s %s sign %s" nostr-python-path nostr-keys-python message)
+   ))
+(nostr-sign "test10")
 
 (defun nostr-create-event (sk kind content)
   (let* ((pk (nostr-get-pk sk))
@@ -56,13 +51,13 @@
 
 (defun nostr-send-message (event)
   (setq nostr-socket
-      (websocket-open "wss://nostr-pub.wellorder.net"
-		      :on-message (lambda (_websocket frame)
-                         (nostr-write-to-buf (format "ws frame: %S" (websocket-frame-text frame))))
-		      :on-close (lambda (_websocket) (message "WS Closed"))
-		      :on-error (lambda (_websocket frame)
-				  (nostr-write-to-buf (format "ERROR: %S" (websocket-frame-text frame))))) 
-      )
+        (websocket-open "wss://nostr-pub.wellorder.net"
+		        :on-message (lambda (_websocket frame)
+                                      (nostr-write-to-buf (format "ws frame: %S" (websocket-frame-text frame))))
+		        :on-close (lambda (_websocket) (message "WS Closed"))
+		        :on-error (lambda (_websocket frame)
+				    (nostr-write-to-buf (format "ERROR: %S" (websocket-frame-text frame)))))
+        )
   (sleep-for 2)
   (websocket-send-text nostr-socket event)
   (websocket-close nostr-socket)
